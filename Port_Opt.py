@@ -56,3 +56,21 @@ allocation, leftover = da.lp_portfolio()
 
 print("Discrete allocation:", allocation)
 print("Funds remaining: Rs{:.2f}".format(leftover))
+# Export results to Excel
+with pd.ExcelWriter("portfolio_analysis.xlsx", engine='xlsxwriter') as writer:
+    # Export cleaned weights
+    pd.Series(cleaned_weights).to_excel(writer, sheet_name="Weights")
+    
+    # Export portfolio performance
+    performance_df = pd.DataFrame({
+        "Metric": ["Expected Annual Return", "Annual Volatility", "Sharpe Ratio"],
+        "Value": [expected_return, volatility, sharpe_ratio]
+    })
+    performance_df.to_excel(writer, sheet_name="Performance", index=False)
+    
+    # Export discrete allocation
+    allocation_df = pd.DataFrame(list(allocation.items()), columns=["Ticker", "Shares"])
+    allocation_df.to_excel(writer, sheet_name="Discrete Allocation", index=False)
+    
+    # Export remaining funds
+    pd.DataFrame({"Funds Remaining": [f"Rs{leftover:.2f}"]}).to_excel(writer, sheet_name="Discrete Allocation", startrow=len(allocation_df) + 2, index=False)
